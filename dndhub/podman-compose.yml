@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  db:
+    image: docker.io/library/postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: myappuser
+      POSTGRES_PASSWORD: secretpw
+      POSTGRES_DB: myappdb
+    ports:
+      - "15432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
