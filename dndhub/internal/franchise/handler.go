@@ -27,6 +27,7 @@ func (h *Handler) Routes() chi.Router {
 	r.Put("/{id}", h.handleUpdateFranchise)
 	r.Put("/{id}/workers/{workerId}", h.handleUpdateWorker)
 	r.Delete("/{id}/workers/{workerId}", h.handleDeleteWorker)
+	r.Post("/{id}/simulate", h.handleSimulate)
 
 	return r
 }
@@ -303,4 +304,40 @@ func (h *Handler) handleDeleteWorker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handler) handleSimulate(w http.ResponseWriter, r *http.Request) {
+	userIDStr, ok := user.GetUserID(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	uid, err := uuid.Parse(userIDStr)
+	if err != nil {
+		http.Error(w, "invalid user id", http.StatusUnauthorized)
+		return
+	}
+
+	franchiseIDStr := chi.URLParam(r, "id")
+	fid, err := uuid.Parse(franchiseIDStr)
+	if err != nil {
+		http.Error(w, "invalid franchise id", http.StatusBadRequest)
+		return
+	}
+
+	// Body: list of activities
+	var activities []ActivityRequest
+	if err := json.NewDecoder(r.Body).Decode(&activities); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := h.service.SimulateFranchise(r.Context(), uid, fid, activities)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }

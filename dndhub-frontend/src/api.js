@@ -91,3 +91,21 @@ export async function deleteWorker(franchiseId, workerId) {
     if (!res.ok) throw new Error("Failed to delete worker");
 }
 
+export async function simulateFranchise(id, activities) {
+    const res = await fetch(`${API_URL}/franchise/${id}/simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        body: JSON.stringify(activities),
+    });
+    if (!res.ok) {
+        // Try to get error message from body
+        try {
+            const err = await res.json();
+            throw new Error(err.message || err || "Simulation failed"); // Fixed: correctly access message
+        } catch (e) {
+             throw new Error("Simulation failed");
+        }
+    }
+    return res.json();
+}
+
