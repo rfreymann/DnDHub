@@ -55,7 +55,41 @@ export default function WorkerItem({ franchiseId, worker, onUpdated }) {
     return (
         <li className="mb-2 border p-2">
             <form onSubmit={handleSave} className="grid grid-cols-2 gap-2">
-                {/* inputs as before */}
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-500">Name</label>
+                    <input className="border p-1 w-full rounded"
+                        value={edit.name}
+                        onChange={e => setEdit({ ...edit, name: e.target.value })} />
+                </div>
+
+                <div>
+                    <label className="block text-xs font-bold text-gray-500">Monthly Cost</label>
+                    <input type="number" className="border p-1 w-full rounded"
+                        value={edit.monthly_cost_cents}
+                        onChange={e => setEdit({ ...edit, monthly_cost_cents: parseInt(e.target.value) })} />
+                </div>
+
+                {[
+                    { l: 'Creativity', k: 'creativity' },
+                    { l: 'Discipline', k: 'discipline' },
+                    { l: 'Charisma', k: 'charisma' },
+                    { l: 'Efficiency', k: 'efficiency' },
+                    { l: 'Exploration', k: 'exploration' }
+                ].map(({ l, k }) => (
+                    <div key={k}>
+                        <label className="block text-xs font-bold text-gray-500">{l}</label>
+                        <input type="number" className="border p-1 w-full rounded"
+                            value={edit[k]}
+                            onChange={e => setEdit({ ...edit, [k]: parseInt(e.target.value) })} />
+                    </div>
+                ))}
+
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-500">Notes</label>
+                    <input className="border p-1 w-full rounded"
+                        value={edit.notes}
+                        onChange={e => setEdit({ ...edit, notes: e.target.value })} />
+                </div>
                 <div className="col-span-2 flex gap-2">
                     <button className="bg-blue-500 text-white px-3 py-1">Save</button>
                     <button

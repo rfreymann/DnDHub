@@ -218,3 +218,37 @@ func (r *Repository) DeleteWorker(ctx context.Context, franchiseID, workerID uui
 	`, workerID, franchiseID)
 	return err
 }
+
+func (r *Repository) CreateHistory(ctx context.Context, h FranchiseHistory) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO franchise_history (franchise_id, revenue, expenses, profit, roll, activities, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, now())
+	`, h.FranchiseID, h.Revenue, h.Expenses, h.Profit, h.Roll, h.Activities)
+	return err
+}
+
+func (r *Repository) GetHistoryByFranchise(ctx context.Context, franchiseID uuid.UUID) ([]FranchiseHistory, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, franchise_id, revenue, expenses, profit, roll, COALESCE(activities, ''), created_at
+		FROM franchise_history
+		WHERE franchise_id = $1
+		ORDER BY created_at DESC
+	`, franchiseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []FranchiseHistory
+	for rows.Next() {
+		var h FranchiseHistory
+		if err := rows.Scan(
+			&h.ID, &h.FranchiseID, &h.Revenue, &h.Expenses,
+			&h.Profit, &h.Roll, &h.Activities, &h.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		list = append(list, h)
+	}
+	return list, rows.Err()
+}

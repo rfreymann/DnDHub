@@ -28,6 +28,7 @@ func (h *Handler) Routes() chi.Router {
 	r.Put("/{id}/workers/{workerId}", h.handleUpdateWorker)
 	r.Delete("/{id}/workers/{workerId}", h.handleDeleteWorker)
 	r.Post("/{id}/simulate", h.handleSimulate)
+	r.Get("/{id}/history", h.handleGetHistory)
 
 	return r
 }
@@ -340,4 +341,33 @@ func (h *Handler) handleSimulate(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+func (h *Handler) handleGetHistory(w http.ResponseWriter, r *http.Request) {
+	userIDStr, ok := user.GetUserID(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	uid, err := uuid.Parse(userIDStr)
+	if err != nil {
+		http.Error(w, "invalid user id", http.StatusUnauthorized)
+		return
+	}
+
+	franchiseIDStr := chi.URLParam(r, "id")
+	fid, err := uuid.Parse(franchiseIDStr)
+	if err != nil {
+		http.Error(w, "invalid franchise id", http.StatusBadRequest)
+		return
+	}
+
+	history, err := h.service.GetFranchiseHistory(r.Context(), uid, fid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(history)
 }

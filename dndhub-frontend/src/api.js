@@ -103,9 +103,17 @@ export async function simulateFranchise(id, activities) {
             const err = await res.json();
             throw new Error(err.message || err || "Simulation failed"); // Fixed: correctly access message
         } catch (e) {
-             throw new Error("Simulation failed");
+            throw new Error("Simulation failed");
         }
     }
+    return res.json();
+}
+
+export async function getHistory(id) {
+    const res = await fetch(`${API_URL}/franchise/${id}/history`, {
+        headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to load history");
     return res.json();
 }
 

@@ -28,3 +28,14 @@ type FranchiseWithWorkers struct {
 	Franchise
 	Workers []UniqueWorker `json:"workers"`
 }
+
+type FranchiseHistory struct {
+	ID          uuid.UUID `db:"id" json:"id"`
+	FranchiseID uuid.UUID `db:"franchise_id" json:"franchise_id"`
+	Revenue     int64     `db:"revenue" json:"revenue"`
+	Expenses    int64     `db:"expenses" json:"expenses"`
+	Profit      int64     `db:"profit" json:"profit"`
+	Roll        int       `db:"roll" json:"roll"`
+	Activities  string    `db:"activities" json:"activities"`
+	CreatedAt   time.Time `db:"created_at" json:"created_at"`
+}
